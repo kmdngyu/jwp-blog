@@ -1,5 +1,8 @@
 package techcourse.myblog.domain;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -12,6 +15,21 @@ public class Comment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     //    private LocalDateTime date;
+
+    public LocalDateTime getCreatedTimeAt() {
+        return createdTimeAt;
+    }
+
+    public LocalDateTime getUpdateTimeAt() {
+        return updateTimeAt;
+    }
+
+    @CreationTimestamp
+    private LocalDateTime createdTimeAt;
+
+    @UpdateTimestamp
+
+    private LocalDateTime updateTimeAt;
     @ManyToOne
     private Article article;
 
@@ -44,5 +62,9 @@ public class Comment {
 
     public String getContents() {
         return this.contents;
+    }
+
+    public void setContents(String contents){
+        this.contents = contents ;
     }
 }

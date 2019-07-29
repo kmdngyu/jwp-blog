@@ -5,7 +5,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 import techcourse.myblog.domain.Article;
-import techcourse.myblog.domain.UserRepository;
 import techcourse.myblog.service.ArticleService;
 import techcourse.myblog.service.CommentService;
 import techcourse.myblog.service.UserService;
@@ -17,6 +16,7 @@ public class ArticleController {
     private final ArticleService articleService;
     private final CommentService commentService;
     private final UserService userService;
+
     public ArticleController(ArticleService articleService, CommentService commentService, UserService userService) {
         this.userService = userService;
         this.articleService = articleService;
@@ -43,7 +43,7 @@ public class ArticleController {
     public String read(@PathVariable long articleId, Model model) {
         return articleService.maybeArticle(articleId).map(article -> {
             model.addAttribute("article", article);
-//            model.addAttribute("comments", article.getComments());
+            model.addAttribute("comments", article.getComments());
             return "article";
         }).orElse("redirect:/");
     }
@@ -70,9 +70,20 @@ public class ArticleController {
     }
 
     @PostMapping("/articles/{articleId}/comment")
-    public RedirectView writeComment(@PathVariable long articleId, String contents, HttpSession session){
-        String currentEmail = (String)session.getAttribute("email");
-        commentService.write(articleService.maybeArticle(articleId), userService.getUserByEmail(currentEmail),contents);
-        return
+    public RedirectView writeComment(@PathVariable long articleId, String contents, HttpSession session) {
+        String currentEmail = (String) session.getAttribute("email");
+        commentService.write(articleService.maybeArticle(articleId).get(), userService.getUserByEmail(currentEmail), contents);
+        return new RedirectView("/articles/" + articleId);
+    }
+    @DeleteMapping("/articles/{articleId}/comment/{commentId}")
+    public RedirectView deleteComment(@PathVariable long articleId, @PathVariable long commentId) {
+        commentService.delete(commentId);
+        return new RedirectView("/articles/" + articleId);
+    }
+
+    @PutMapping("/articles/{articleId}/comment/{commentId}")
+    public RedirectView updateComment(@PathVariable long articleId, @PathVariable long commentId,String content) {
+        commentService.tryUpdate(commentId,content);
+        return new RedirectView("/articles/" + articleId);
     }
 }
